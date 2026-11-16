@@ -112,7 +112,7 @@ If writing code, components, apps, games, or web pages, always format them insid
         });
 
         if (antRes.ok && antRes.body) {
-          return streamFromAnthropic(antRes, trimmedMessage);
+          return streamFromAnthropic(antRes, trimmedMessage, selectedModelId);
         }
       } catch (antErr) {
         console.warn('Anthropic API bypassed or timed out:', antErr);
@@ -278,7 +278,7 @@ You can connect with him, follow his journey, and discover his latest innovation
   });
 }
 
-function streamFromAnthropic(upstreamRes: Response, promptText: string) {
+function streamFromAnthropic(upstreamRes: Response, promptText: string, modelId: string = 'claude-3-7-sonnet') {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const reader = upstreamRes.body!.getReader();

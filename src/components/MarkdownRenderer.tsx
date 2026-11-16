@@ -36,7 +36,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                       onOpenArtifact({
                         id: `art-inline-${idx}`,
                         identifier: `component-${idx}`,
-                        title: `${block.language.toUpperCase()} Component`,
+                        title: `${(block.language || 'Code').toUpperCase()} Component`,
                         type: block.language === 'svg' ? 'svg' : 'html',
                         version: 1,
                         content: block.content,

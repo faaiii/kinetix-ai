@@ -9,6 +9,7 @@ import { ChatInput } from '@/components/ChatInput';
 import { ArtifactDrawer } from '@/components/ArtifactDrawer';
 import { ApiKeyModal, ApiConfig } from '@/components/ApiKeyModal';
 import {
+  AVAILABLE_MODELS,
   INITIAL_CONVERSATIONS,
   INITIAL_PROJECTS,
   SAMPLE_CHAT_MESSAGES,
