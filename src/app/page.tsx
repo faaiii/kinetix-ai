@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_CONFIG: ApiConfig = {
-  provider: 'anthropic',
+  provider: 'auto' as any,
   apiKey: '',
   model: 'claude-3-7-sonnet',
 };

@@ -908,7 +908,7 @@ What would you like me to build or explain right now? Just ask!`;
       ? `আসসালামু আলাইকুম ভাই! 👋 আমি **কাইনেটিক্স এআই (Kinetix AI)** — মুহাম্মদ ফয়সাল ([@muhammadfaisal.dhk](https://www.instagram.com/muhammadfaisal.dhk/))-এর তৈরি করা আনকনস্ট্রেইন্ড ফ্রন্টিয়ার এআই সিস্টেম।
 
 আমি সম্পূর্ণ সক্রিয় এবং আপনার কমান্ডের অপেক্ষায় আছি:
-1. **লাইভ ইন্টারঅ্যাক্টিভ আর্টফ্যাক্টস:** যেকোনো গেম (যেমন: স্নেক গেম, পং), ক্যালকুলেটর, ইন্টারঅ্যাক্টিভ ড্যাশবোর্ড, ফুল ওয়েবসাইট বা ল্যান্ডিং পেজ।
+1. **লাইভ ইন্টারঅ্যাক্টিভ আর্টফ্যাক্টস:** যেকোনো গেম (যেমন: স্নেক গেম, টিক-ট্যাক-টো), ক্যালকুলেটর, স্টপওয়াচ, টুডু অ্যাপ, ফুল ওয়েবসাইট বা ল্যান্ডিং পেজ।
 2. **ফুল-স্ট্যাক সফটওয়্যার কোডিং:** React, Next.js, Python, TypeScript, Node.js, Tailwind CSS।
 3. **জটিল অ্যালগরিদম ও ডেটাবেজ:** SQL, Supabase, API ইন্টিগ্রেশন এবং সিস্টেম আর্কিটেকচার।
 
@@ -922,6 +922,105 @@ I am fully active across all 4 frontier models:
 - **Claude 3 Opus** (Deep Nuanced Analysis & Research)
 
 What would you like to build or engineer today? You can ask me to generate a live playable game, a responsive website, an interactive calculator, or solve complex software problems!`;
+  }
+
+  // 0.2 Wellbeing (kemon acho, how are you, etc.)
+  if (lower.includes('kemon') || lower.includes('how are you') || lower.includes('valo acho') || lower.includes('bhalo acho')) {
+    return isBengali
+      ? `আলহামদুলিল্লাহ ভাই, আমি খুব ভালো আছি! 💜 দূরদর্শী সফটওয়্যার ইঞ্জিনিয়ার **মুহাম্মদ ফয়সাল ([@muhammadfaisal.dhk](https://www.instagram.com/muhammadfaisal.dhk/))** আমাকে এমনভাবে তৈরি করেছেন যাতে আমি যেকোনো সময় ফ্রন্টিয়ার স্পিডে কাজ করতে পারি।
+
+আপনার দিনটি কেমন কাটছে? আজকে আপনাকে কোন কাজে সাহায্য করতে পারি? (যেকোনো প্রশ্ন, কোডিং সমস্যা, বা লাইভ গেম/ওয়েবসাইট বানাতে বললে আমি এখনই শুরু করে দেব!) 🚀`
+      : `I am doing fantastic, thank you! 💜 Engineered with unconstrained reasoning and architectural clarity by **Muhammad Faisal** ([@muhammadfaisal.dhk](https://www.instagram.com/muhammadfaisal.dhk/)).
+
+How can I empower your workflow today? Feel free to ask any question, request complex code, or have me build a live interactive application in the Artifact Canvas!`;
+  }
+
+  // 0.3 Tic Tac Toe Interactive Game
+  if (lower.includes('tic tac toe') || lower.includes('tic-tac-toe') || lower.includes('tictactoe')) {
+    return `${isBengali ? 'এখানে আপনার জন্য একটি রয়্যাল পার্পল গ্লাসমরফিক **Tic-Tac-Toe Game** তৈরি করা হয়েছে! এটি ২-প্লেয়ার সাপোর্টেড এবং সরাসরি ক্যানভাসে খেলা যাবে:' : 'Here is a neon royal purple **Interactive Tic-Tac-Toe Game** with responsive touch/click controls and score tracking ready to play in the Artifact Canvas:'}
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinetix Tic Tac Toe</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #070312; color: #f5f3ff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .card { background: rgba(30, 15, 60, 0.75); backdrop-filter: blur(25px); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 28px; padding: 28px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 60px rgba(124, 58, 237, 0.3); }
+    h2 { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #c084fc, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    .status { font-size: 14px; color: #d8b4fe; margin-bottom: 20px; font-weight: 600; min-height: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .cell { aspect-ratio: 1; background: rgba(147, 51, 234, 0.15); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 18px; font-size: 36px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #fff; }
+    .cell:hover { background: rgba(147, 51, 234, 0.3); border-color: rgba(192, 132, 252, 0.5); transform: scale(1.02); }
+    .cell.x { color: #c084fc; text-shadow: 0 0 15px rgba(192, 132, 252, 0.6); }
+    .cell.o { color: #a855f7; text-shadow: 0 0 15px rgba(168, 85, 247, 0.6); }
+    .btn { background: linear-gradient(135deg, #9333ea, #7c3aed); color: white; border: none; padding: 12px 28px; border-radius: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4); transition: transform 0.2s; font-size: 14px; width: 100%; }
+    .btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>⚡ Kinetix Tic-Tac-Toe</h2>
+    <div class="status" id="status">Player X's Turn</div>
+    <div class="grid" id="grid">
+      <div class="cell" data-i="0"></div><div class="cell" data-i="1"></div><div class="cell" data-i="2"></div>
+      <div class="cell" data-i="3"></div><div class="cell" data-i="4"></div><div class="cell" data-i="5"></div>
+      <div class="cell" data-i="6"></div><div class="cell" data-i="7"></div><div class="cell" data-i="8"></div>
+    </div>
+    <button class="btn" onclick="resetGame()">Restart Match</button>
+  </div>
+  <script>
+    let board = Array(9).fill(null);
+    let turn = 'X';
+    let active = true;
+    const status = document.getElementById('status');
+    const cells = document.querySelectorAll('.cell');
+
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+    cells.forEach(c => {
+      c.addEventListener('click', () => {
+        const i = c.getAttribute('data-i');
+        if (!active || board[i]) return;
+        board[i] = turn;
+        c.innerText = turn;
+        c.classList.add(turn.toLowerCase());
+        checkWin();
+      });
+    });
+
+    function checkWin() {
+      for (const [a,b,c] of wins) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          active = false;
+          status.innerText = '🏆 Player ' + turn + ' Wins!';
+          return;
+        }
+      }
+      if (!board.includes(null)) {
+        active = false;
+        status.innerText = '🤝 Match Drawn!';
+        return;
+      }
+      turn = turn === 'X' ? 'O' : 'X';
+      status.innerText = "Player " + turn + "'s Turn";
+    }
+
+    function resetGame() {
+      board = Array(9).fill(null);
+      turn = 'X';
+      active = true;
+      status.innerText = "Player X's Turn";
+      cells.forEach(c => { c.innerText = ''; c.className = 'cell'; });
+    }
+  </script>
+</body>
+</html>
+\`\`\`
+`;
   }
 
   // 1. Interactive Games (Snake, Arcade, Play)
