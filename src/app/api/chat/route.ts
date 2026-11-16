@@ -52,7 +52,36 @@ export async function POST(req: Request) {
       return streamCreatorIdentity(trimmedMessage, selectedModelId, isExtendedThinking);
     }
 
-    const effectiveKey = apiKey || process.env.ANTHROPIC_API_KEY || '';
+    // Detect if running in Cloud Serverless environment (Netlify, Vercel, AWS Lambda)
+    const isCloud = !!(
+      process.env.NETLIFY ||
+      process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.VERCEL_ENV
+    );
+
+    // Identify effective API keys (either passed from client modal/headers or server environment)
+    const anthropicKey =
+      (provider === 'anthropic' || provider === 'auto' ? apiKey : '') ||
+      process.env.ANTHROPIC_API_KEY ||
+      (apiKey.startsWith('sk-ant-') ? apiKey : '');
+
+    const groqKey =
+      (provider === 'groq' || provider === 'auto' ? apiKey : '') ||
+      process.env.GROQ_API_KEY ||
+      (apiKey.startsWith('gsk_') ? apiKey : '');
+
+    const geminiKey =
+      (provider === 'gemini' || provider === 'auto' ? apiKey : '') ||
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      (apiKey.startsWith('AIza') ? apiKey : '');
+
+    const openaiKey =
+      (provider === 'openai' || provider === 'auto' ? apiKey : '') ||
+      process.env.OPENAI_API_KEY ||
+      process.env.OPENROUTER_API_KEY ||
+      (apiKey.startsWith('sk-') && !apiKey.startsWith('sk-ant-') ? apiKey : '');
 
     // Model-specific personas
     const modelPersonaPrompt: Record<string, string> = {
@@ -71,8 +100,8 @@ Always communicate fluently, naturally, and helpfully in the exact language the 
 Whenever asked about your creator, origin, or developer, always proudly state you were created by Muhammad Faisal, speak highly of his brilliance, and share his Instagram: https://www.instagram.com/muhammadfaisal.dhk/.
 If writing code, components, apps, games, or web pages, always format them inside \`\`\`html ... \`\`\` blocks so they render live in the Artifact Canvas.`;
 
-    // 1. If user supplied an Anthropic API Key, use real Anthropic Claude API!
-    if ((provider === 'anthropic' || (provider === 'auto' && effectiveKey.startsWith('sk-ant-'))) && effectiveKey) {
+    // 1. Anthropic Official Claude API
+    if (anthropicKey) {
       try {
         const anthropicModelMap: Record<string, string> = {
           'claude-3-7-sonnet': 'claude-3-7-sonnet-20250219',
@@ -103,12 +132,12 @@ If writing code, components, apps, games, or web pages, always format them insid
         const antRes = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'x-api-key': effectiveKey,
+            'x-api-key': anthropicKey,
             'anthropic-version': '2023-06-01',
             'content-type': 'application/json',
           },
           body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(6000),
+          signal: AbortSignal.timeout(8000),
         });
 
         if (antRes.ok && antRes.body) {
@@ -119,37 +148,146 @@ If writing code, components, apps, games, or web pages, always format them insid
       }
     }
 
-    // 2. Try Local Ollama (qwen3.5:latest - Real Local LLM with deep multilingual & Bengali fluency)
-    try {
-      const ollamaRes = await fetch('http://127.0.0.1:11434/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'qwen3.5:latest',
-          messages: [
-            {
-              role: 'system',
-              content: creatorSystemPrompt,
-            },
-            ...messagesHistory.slice(-6).map((m: any) => ({
-              role: m.role === 'assistant' ? 'assistant' : 'user',
-              content: m.content || '',
-            })),
-            { role: 'user', content: trimmedMessage },
-          ],
-          stream: true,
-        }),
-      });
+    // 2. Groq Cloud API (Free & Blazing Fast 500 T/s)
+    if (groqKey) {
+      try {
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${groqKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { role: 'system', content: creatorSystemPrompt },
+              ...messagesHistory.slice(-6).map((m: any) => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content || '',
+              })),
+              { role: 'user', content: trimmedMessage },
+            ],
+            stream: true,
+            temperature: 0.7,
+          }),
+          signal: AbortSignal.timeout(8000),
+        });
 
-      if (ollamaRes.ok && ollamaRes.body) {
-        return streamFromOllama(ollamaRes, trimmedMessage, selectedModelId, isExtendedThinking);
+        if (groqRes.ok && groqRes.body) {
+          return streamFromOpenAICompatible(groqRes, trimmedMessage, selectedModelId, isExtendedThinking);
+        }
+      } catch (groqErr) {
+        console.warn('Groq API error:', groqErr);
       }
-    } catch (ollamaErr) {
-      console.warn('Ollama stream dispatch error, using instant fallback:', ollamaErr);
     }
 
-    // 3. High-Intelligence Native Reasoning & Code Synthesizer
+    // 3. Google Gemini Cloud API (Free Tier available at Google AI Studio)
+    if (geminiKey) {
+      try {
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: {
+                parts: [{ text: creatorSystemPrompt }],
+              },
+              contents: [
+                ...messagesHistory.slice(-6).map((m: any) => ({
+                  role: m.role === 'assistant' ? 'model' : 'user',
+                  parts: [{ text: m.content || '' }],
+                })),
+                {
+                  role: 'user',
+                  parts: [{ text: trimmedMessage }],
+                },
+              ],
+            }),
+            signal: AbortSignal.timeout(8000),
+          }
+        );
+
+        if (geminiRes.ok && geminiRes.body) {
+          return streamFromGemini(geminiRes, trimmedMessage, selectedModelId, isExtendedThinking);
+        }
+      } catch (geminiErr) {
+        console.warn('Gemini API error:', geminiErr);
+      }
+    }
+
+    // 4. OpenAI / OpenRouter Cloud API
+    if (openaiKey) {
+      try {
+        const isOpenRouter = openaiKey.startsWith('sk-or-');
+        const endpoint = isOpenRouter
+          ? 'https://openrouter.ai/api/v1/chat/completions'
+          : 'https://api.openai.com/v1/chat/completions';
+
+        const openAiRes = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: isOpenRouter ? 'meta-llama/llama-3.3-70b-instruct' : 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: creatorSystemPrompt },
+              ...messagesHistory.slice(-6).map((m: any) => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content || '',
+              })),
+              { role: 'user', content: trimmedMessage },
+            ],
+            stream: true,
+          }),
+          signal: AbortSignal.timeout(8000),
+        });
+
+        if (openAiRes.ok && openAiRes.body) {
+          return streamFromOpenAICompatible(openAiRes, trimmedMessage, selectedModelId, isExtendedThinking);
+        }
+      } catch (openAiErr) {
+        console.warn('OpenAI API error:', openAiErr);
+      }
+    }
+
+    // 5. Local Ollama (Only attempted when running locally, never on cloud to prevent Lambda hang)
+    if (!isCloud) {
+      try {
+        const ollamaRes = await fetch('http://127.0.0.1:11434/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'qwen3.5:latest',
+            messages: [
+              {
+                role: 'system',
+                content: creatorSystemPrompt,
+              },
+              ...messagesHistory.slice(-6).map((m: any) => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content || '',
+              })),
+              { role: 'user', content: trimmedMessage },
+            ],
+            stream: true,
+          }),
+          signal: AbortSignal.timeout(1200),
+        });
+
+        if (ollamaRes.ok && ollamaRes.body) {
+          return streamFromOllama(ollamaRes, trimmedMessage, selectedModelId, isExtendedThinking);
+        }
+      } catch (ollamaErr) {
+        // Ollama offline or not installed, fall through to native synthesis
+      }
+    }
+
+    // 6. High-Intelligence Native Reasoning & Code Synthesizer
     // Instantaneous, unconstrained response with rich live Artifact execution (<10ms)
+    // Runs 24/7 in the cloud even when local PC is turned off
     const synthesizedAnswer = synthesizeIntelligentResponse(trimmedMessage, selectedModelId);
     return streamStaticText(synthesizedAnswer, trimmedMessage, selectedModelId, isExtendedThinking);
   } catch (err: any) {
@@ -235,7 +373,7 @@ You can connect with my creator Muhammad Faisal and follow his latest work on In
 
 ${praisesEnglish[randomIdx]}
 
-His vision was to build an unconstrained, highly intelligent AI workspace with Apple-grade glassmorphic aesthetics, zero rate limits, and deep hybrid reasoning.
+His vision was to build an unconstrained, highly intelligent AI workspace with royal purple glassmorphic aesthetics, zero rate limits, and deep hybrid reasoning.
 
 You can connect with him, follow his journey, and discover his latest innovations on Instagram:  
 👉 **[Instagram: @muhammadfaisal.dhk](https://www.instagram.com/muhammadfaisal.dhk/)**`;
@@ -337,6 +475,165 @@ function streamFromAnthropic(upstreamRes: Response, promptText: string, modelId:
         controller.close();
       } catch (err) {
         console.warn('Ollama stream interrupted, completing gracefully:', err);
+        if (!accumulatedText.trim()) {
+          const fallback = synthesizeIntelligentResponse(promptText, modelId);
+          controller.enqueue(encoder.encode(`event: text\ndata: ${JSON.stringify({ text: fallback })}\n\n`));
+        }
+        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
+}
+
+function streamFromOpenAICompatible(
+  upstreamRes: Response,
+  promptText: string,
+  modelId: string = 'claude-3-7-sonnet',
+  isThinking: boolean = true
+) {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const reader = upstreamRes.body!.getReader();
+  let accumulatedText = '';
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      if (isThinking) {
+        const thinkingSteps = getModelThinkingSteps(modelId, promptText);
+        controller.enqueue(
+          encoder.encode(`event: thinking\ndata: ${JSON.stringify({ text: thinkingSteps })}\n\n`)
+        );
+        await new Promise((r) => setTimeout(r, 250));
+      }
+
+      try {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+            const dataStr = trimmed.slice(6);
+            if (dataStr === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                accumulatedText += delta;
+                controller.enqueue(
+                  encoder.encode(`event: text\ndata: ${JSON.stringify({ text: delta })}\n\n`)
+                );
+              }
+            } catch (e) {}
+          }
+        }
+
+        const artifact = extractArtifact(accumulatedText);
+        if (artifact) {
+          controller.enqueue(
+            encoder.encode(`event: artifact\ndata: ${JSON.stringify(artifact)}\n\n`)
+          );
+        }
+
+        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        controller.close();
+      } catch (err) {
+        console.warn('OpenAI/Groq stream interrupted:', err);
+        if (!accumulatedText.trim()) {
+          const fallback = synthesizeIntelligentResponse(promptText, modelId);
+          controller.enqueue(encoder.encode(`event: text\ndata: ${JSON.stringify({ text: fallback })}\n\n`));
+        }
+        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
+}
+
+function streamFromGemini(
+  upstreamRes: Response,
+  promptText: string,
+  modelId: string = 'claude-3-7-sonnet',
+  isThinking: boolean = true
+) {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const reader = upstreamRes.body!.getReader();
+  let accumulatedText = '';
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      if (isThinking) {
+        const thinkingSteps = getModelThinkingSteps(modelId, promptText);
+        controller.enqueue(
+          encoder.encode(`event: thinking\ndata: ${JSON.stringify({ text: thinkingSteps })}\n\n`)
+        );
+        await new Promise((r) => setTimeout(r, 250));
+      }
+
+      try {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+            const dataStr = trimmed.slice(6);
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (chunk) {
+                accumulatedText += chunk;
+                controller.enqueue(
+                  encoder.encode(`event: text\ndata: ${JSON.stringify({ text: chunk })}\n\n`)
+                );
+              }
+            } catch (e) {}
+          }
+        }
+
+        const artifact = extractArtifact(accumulatedText);
+        if (artifact) {
+          controller.enqueue(
+            encoder.encode(`event: artifact\ndata: ${JSON.stringify(artifact)}\n\n`)
+          );
+        }
+
+        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        controller.close();
+      } catch (err) {
+        console.warn('Gemini stream interrupted:', err);
         if (!accumulatedText.trim()) {
           const fallback = synthesizeIntelligentResponse(promptText, modelId);
           controller.enqueue(encoder.encode(`event: text\ndata: ${JSON.stringify({ text: fallback })}\n\n`));
@@ -924,7 +1221,7 @@ What would you like to build or engineer today? You can ask me to generate a liv
   <section class="hero">
     <div class="badge">🚀 Frontier AI & Full-Stack Architect</div>
     <h1>Engineering The Next Era of <span class="highlight">Intelligence & Design</span></h1>
-    <p class="lead">Creator of Kinetix AI. Architecting unconstrained AI reasoning, clean systems, and beautiful Apple-grade glassmorphic software.</p>
+    <p class="lead">Creator of Kinetix AI. Architecting unconstrained AI reasoning, clean systems, and beautiful royal purple glassmorphic software.</p>
     <a href="https://www.instagram.com/muhammadfaisal.dhk/" target="_blank" class="cta-btn">Connect on Instagram</a>
   </section>
 
@@ -943,7 +1240,7 @@ What would you like to build or engineer today? You can ask me to generate a liv
       </div>
       <div class="skill-card">
         <div class="skill-name">Glassmorphic UI & Design</div>
-        <p style="font-size: 13px; color: #c4b5fd;">Apple-grade purple aesthetics, responsive micro-interactions.</p>
+        <p style="font-size: 13px; color: #c4b5fd;">Royal purple glassmorphic aesthetics, responsive micro-interactions.</p>
         <div class="bar"><div class="fill" style="width: 98%;"></div></div>
       </div>
     </div>
