@@ -1,0 +1,20 @@
+{
+  "name": "Kinetix",
+  "avoid": [
+    "Claude",
+    "Claude.ai",
+    "Claude AI",
+    "Anthropic",
+    "Anthropic PBC"
+  ],
+  "domains": [
+    "claude.ai",
+    "anthropic.com"
+  ],
+  "colors": [
+    "#d97757",
+    "#cc785c",
+    "#b84e2a",
+    "#a34222"
+  ]
+}

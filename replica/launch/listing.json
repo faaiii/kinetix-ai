@@ -1,0 +1,22 @@
+{
+  "avoid": [
+    "Claude",
+    "Claude.ai",
+    "Claude AI",
+    "Anthropic",
+    "Anthropic PBC"
+  ],
+  "app_store": {
+    "name": "Kinetix: AI Code Canvas",
+    "subtitle": "Fast Artifacts & Reasoning",
+    "promotional_text": "Build interactive components and execute code with live token telemetry and zero rate-limit lockouts.",
+    "description": "Kinetix is an unconstrained conversational AI workspace built for software engineers, designers, and technical builders.\n\nCraft interactive HTML, SVG, and code components in a real-time split-screen canvas while watching deep reasoning unfold.\n\nWhat makes Kinetix different:\n- Interactive Artifacts: Inspect and execute web components in an isolated sandboxed runner with version switching and source code export.\n- Transparent Token Telemetry: Monitor live token counts on every prompt. Never wonder why your usage changed.\n- BYOK Overflow Fallback: Connect your own API keys when monthly limits run low so your coding flow never stops.\n- Local Model Support: Route sensitive corporate tasks directly to local Ollama instances running on your machine for complete privacy.\n- Project Knowledge Hub: Attach architectural specs and codebases with visual context budget meters.\n\nDeveloper tier is available at no cost. Pro subscription is $20 a month.",
+    "keywords": "developer,terminal,programming,ide,ollama,byok,markdown,editor,inspector,workspace",
+    "whats_new": "Initial release of Kinetix with interactive Artifacts canvas, deep reasoning engine, and live token telemetry."
+  },
+  "google_play": {
+    "title": "Kinetix: AI Code Canvas",
+    "short_description": "Build code and interactive components with live reasoning and telemetry.",
+    "full_description": "Kinetix is an unconstrained conversational AI workspace built for software engineers, designers, and technical builders.\n\nCraft interactive HTML, SVG, and code components in a real-time split-screen canvas while watching deep reasoning unfold.\n\nWhat makes Kinetix different:\n- Interactive Artifacts: Inspect and execute web components in an isolated sandboxed runner with version switching and source code export.\n- Transparent Token Telemetry: Monitor live token counts on every prompt. Never wonder why your usage changed.\n- BYOK Overflow Fallback: Connect your own API keys when monthly limits run low so your coding flow never stops.\n- Local Model Support: Route sensitive corporate tasks directly to local Ollama instances running on your machine for complete privacy.\n- Project Knowledge Hub: Attach architectural specs and codebases with visual context budget meters.\n\nDeveloper tier is available at no cost. Pro subscription is $20 a month."
+  }
+}

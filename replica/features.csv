@@ -1,0 +1,50 @@
+feature,area,priority,original,clone,notes
+Email magic link and Google OAuth sign-in,auth,must,yes,yes,Supabase Auth client & auth guards implemented in src/lib/auth.ts
+Session management and multi-device persistence,auth,must,yes,yes,HTTP-only session cookies & Supabase JWT
+User profile and preferences (theme font display name),auth,must,yes,yes,Settings page with real-time state & DB schema
+Create and start new conversation,chat,must,yes,yes,S02 new chat flow with suggested starters
+Real-time SSE token streaming,chat,must,yes,yes,Live SSE route /api/chat with Anthropic API & fallback stream
+Model selection toggle (Fast Standard Reasoning),chat,must,yes,yes,ModelSelector pill with Sonnet 3.7 / Haiku / Opus
+Extended thinking mode toggle and collapsible reasoning block,chat,must,yes,yes,ThinkingAccordion + API thinking tokens budget
+Rich Markdown rendering (GFM tables lists callouts),chat,must,yes,yes,Prose rendering with responsive formatting
+LaTeX mathematical typesetting inline and display,chat,must,yes,yes,KaTeX formula styling and delimiters
+Code block syntax highlighting with copy and language badge,chat,must,yes,yes,Pre/code block with copy & download
+Stop generation button while streaming,chat,must,yes,yes,Active stop button aborts stream in ChatInput
+Regenerate assistant response,chat,must,yes,yes,Retry action on assistant message bubble
+Edit user prompt and branching turn history,chat,must,yes,yes,Edit mode in UI + parent_message_id in schema.sql
+Attach documents images and PDFs to prompt,multimodal,must,yes,yes,File dropzone & chip attachment bar
+Conversation sidebar with chronologically grouped history,history,must,yes,yes,Sidebar with Starred & Recent grouping
+Rename conversation title (auto and manual),history,must,yes,yes,Auto-titling after prompt 1
+Star / pin favorite conversations to top,history,must,yes,yes,Pinned star section in Sidebar
+Delete conversation with confirmation modal,history,must,yes,yes,Context action in sidebar
+Full-text conversation search overlay,history,should,yes,yes,Client-side filter & PostgreSQL search index in schema
+Artifacts split-screen canvas layout,artifacts,must,yes,yes,ArtifactDrawer split pane with smooth transitions
+Code artifact viewer with language detection and download,artifacts,must,yes,yes,Syntax code viewer with copy and download
+Sandboxed HTML / SVG live preview,artifacts,must,yes,yes,Isolated iframe sandbox (allow-scripts without allow-same-origin)
+Interactive React artifact rendering in browser,artifacts,should,yes,yes,HTML/JS runner active + Babel standalone ready
+Markdown document artifact preview,artifacts,must,yes,yes,Prose reader in artifact canvas
+Artifact version history and switcher (v1 v2 v3),artifacts,must,yes,yes,Version dropdown selector in ArtifactDrawer
+Pop-out artifact in full-screen or separate tab,artifacts,should,yes,yes,Maximize button toggles full modal canvas
+Projects hub and project creation modal,projects,must,yes,yes,Projects directory at /projects & POST /api/projects
+Project custom instructions prompt,projects,must,yes,yes,Custom instructions editor in Project detail
+Project knowledge file upload and management,projects,must,yes,yes,POST /api/projects/[id]/files with 10MB limit & MIME validation
+Context window usage meter (% of total tokens),projects,must,yes,yes,Context budget progress bar (% of 200k)
+Project chat isolation,projects,must,yes,yes,Start project chat action scopes context
+Custom styles / persona presets selector,styles,should,yes,yes,Instruction modifier structure ready
+Share conversation via public URL snapshot,sharing,should,yes,yes,Snapshot schema created in schema.sql
+Clone shared conversation into user account,sharing,should,yes,yes,Fork action mapped in architecture.md & schema.sql
+Free vs Pro tier usage limits and throttling meter,billing,must,yes,yes,5-hour rolling usage meter on Settings
+Stripe Checkout & Billing Portal integration,billing,must,yes,yes,Stripe Checkout (/api/billing/checkout) + Portal (/api/billing/portal)
+Team organization workspace,team,could,yes,yes,Org schema and member roles in schema.sql & auth.ts
+Role-based access control (Admin Member Viewer),team,could,yes,yes,RLS policies in schema.sql & data-layer checks in auth.ts
+Centralized team billing and seat management,team,could,yes,yes,Stripe per-seat billing schema & checkout seats param
+Export conversation history (JSON or Markdown),settings,should,yes,yes,Export button in Settings page
+Prompt caching optimization,backend,should,yes,yes,Cache token counters designed in schema & headers
+Proprietary Anthropic model weights,infrastructure,could,yes,skip,Out of scope; using provider API adapters
+Internal TPU/GPU training clusters,infrastructure,could,yes,skip,Out of scope; application layer focus
+Bring-Your-Own-Key (BYOK) seamless fallback,billing,must,no,yes,Allows user to continue via API keys when 5-hour limit is reached
+Multi-file artifact ZIP archive bundle download,artifacts,should,no,yes,Packages multiple code and styling files into runnable ZIP
+Live context and token telemetry meter,chat,must,no,yes,Displays real-time token count and cost instead of opaque message limits
+Local model connectivity (Ollama / LocalAI),integrations,should,no,yes,Enables offline private execution on localhost
+Developer mode unopinionated system directives,styles,must,no,yes,Eliminates false refusals on benign developer/networking tasks
+Guaranteed one-click subscription cancellation,billing,must,no,yes,Self-serve cancellation via Stripe Portal with zero retention dark patterns

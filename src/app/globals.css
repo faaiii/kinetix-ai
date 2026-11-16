@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Colors - Light Theme: Apple Glassmorphic Purple */
+  --bg: #fbfbfe;
+  --bg-gradient: radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+                 radial-gradient(circle at 85% 80%, rgba(124, 58, 237, 0.06) 0%, transparent 45%),
+                 #fbfbfe;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-hover: rgba(255, 255, 255, 0.88);
+  --border: rgba(139, 92, 246, 0.12);
+  --border-input: rgba(139, 92, 246, 0.25);
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-light: #f5f3ff;
+  --accent-glow: rgba(124, 58, 237, 0.25);
+  --on-accent: #ffffff;
+  --danger: #ef4444;
+  --success: #10b981;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-serif: -apple-system-ui-serif, 'New York', Georgia, serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, monospace;
+
+  /* Apple Glass Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
+  --radius-pill: 9999px;
+
+  /* Apple Glass Shadows */
+  --shadow-card: 0 4px 20px -2px rgba(124, 58, 237, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  --shadow-pop: 0 20px 40px -8px rgba(124, 58, 237, 0.14), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+  --shadow-drawer: -8px 0 32px rgba(124, 58, 237, 0.08);
+  --shadow-glass: 0 8px 32px 0 rgba(109, 40, 217, 0.08);
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --content-max-width: 780px;
+}
+
+[data-theme='dark'] {
+  --bg: #090614;
+  --bg-gradient: radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                 radial-gradient(circle at 85% 80%, rgba(124, 58, 237, 0.12) 0%, transparent 45%),
+                 #090614;
+  --surface: rgba(22, 16, 42, 0.65);
+  --surface-hover: rgba(35, 26, 66, 0.75);
+  --border: rgba(139, 92, 246, 0.2);
+  --border-input: rgba(139, 92, 246, 0.35);
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #a855f7;
+  --accent-hover: #c084fc;
+  --accent-light: rgba(168, 85, 247, 0.18);
+  --accent-glow: rgba(168, 85, 247, 0.35);
+  --on-accent: #ffffff;
+  --danger: #f87171;
+  --success: #34d399;
+
+  --shadow-card: 0 4px 24px -2px rgba(0, 0, 0, 0.5), 0 2px 8px -1px rgba(168, 85, 247, 0.08);
+  --shadow-pop: 0 24px 48px -8px rgba(0, 0, 0, 0.7), 0 8px 24px -4px rgba(168, 85, 247, 0.16);
+  --shadow-drawer: -8px 0 36px rgba(0, 0, 0, 0.6);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.glass-dropdown {
+  background: var(--surface);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+}
+
+/* Custom Purple Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
